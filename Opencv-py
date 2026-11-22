@@ -1,0 +1,114 @@
+图片转化为灰度图
+import numpy as np
+import cv2 as cv
+import matplotlib.pyplot as plt
+# 1 读取图像
+img=cv.imread("myphoto.jpg",0)
+# 2 显示图像
+#cv.imshow("myphoto",img)
+#cv.waitKey(0)
+#cv.destroyAllWindows()
+# 2.2 matplotlib
+plt.imshow(img,cmap=plt.cm.gray)
+plt.show()
+#############################################################################
+图片背景变成黑色
+import cv2 as cv
+import numpy as np
+import matplotlib.pyplot as plt
+# 1. 读取图片
+img = cv.imread("myphoto.jpg")
+# 2. 检查是否读取成功
+if img is None:
+print("图片读取失败，请检查文件名和路径")
+else:
+# 3. 转灰度
+gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+# 4. 用 Otsu 自动找阈值
+# 注意：背景是白色（亮），文字是深色（暗）
+# THRESH_BINARY_INV 会把"亮色背景"变成白色，文字变成黑色
+_, mask = cv.threshold(gray, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU)
+# 5. 创建黑色背景
+result = np.zeros_like(img)  # 全黑
+# 6. 把文字（mask 中白色的部分）复制到黑色背景上
+result[mask == 255] = img[mask == 255]
+# 7. 显示结果
+plt.imshow(cv.cvtColor(result, cv.COLOR_BGR2RGB))
+plt.show()
+#############################################################################
+单RGB输出
+import cv2 as cv
+import numpy as np
+import matplotlib.pyplot as plt
+# 1. 读取图片
+img = cv.imread("myphoto.jpg")
+if img is None:
+    print("图片读取失败")
+else:
+# 2. 分离 BGR 三个通道
+b, g, r = cv.split(img)
+# 3. 创建黑色背景（用于填充其他通道）
+zeros = np.zeros(img.shape[:2], dtype=np.uint8)
+# 4. 只显示红色通道（R通道保留，B和G置零）
+red_only = cv.merge([zeros, zeros, r])
+# 5. 只显示绿色通道
+green_only = cv.merge([zeros, g, zeros])
+# 6. 只显示蓝色通道
+blue_only = cv.merge([b, zeros, zeros])
+# 7. 显示结果
+plt.figure(figsize=(12, 4))
+plt.subplot(1, 3, 1)
+plt.imshow(cv.cvtColor(red_only, cv.COLOR_BGR2RGB))
+plt.title("Red Channel")
+plt.subplot(1, 3, 2)
+plt.imshow(cv.cvtColor(green_only, cv.COLOR_BGR2RGB))
+plt.title("Green Channel")
+plt.subplot(1, 3, 3)
+plt.imshow(cv.cvtColor(blue_only, cv.COLOR_BGR2RGB))
+plt.title("Blue Channel")
+plt.show()
+#############################################################################
+用红线勾勒
+import cv2 as cv
+import numpy as np
+import matplotlib.pyplot as plt
+# 1. 读取图片
+img = cv.imread("myphoto.jpg")
+if img is None:
+print("图片读取失败")
+else:
+# 2. 转灰度
+gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+# 3. 二值化（用 Otsu 自动找阈值）
+ _, binary = cv.threshold(gray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)
+# 4. 查找轮廓
+contours, hierarchy = cv.findContours(binary, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+# 5. 在原图副本上用红色线条绘制所有轮廓
+result = img.copy()
+cv.drawContours(result, contours, -1, (0, 0, 255), 2)  # (0,0,255) 是红色（BGR顺序），2 是线宽
+# 6. 显示结果
+plt.imshow(cv.cvtColor(result, cv.COLOR_BGR2RGB))
+plt.title("红色轮廓")
+plt.show()
+#############################################################################
+向左旋转45°
+import cv2 as cv
+import numpy as np
+import matplotlib.pyplot as plt
+# 1. 读取图片
+img = cv.imread("myphoto.jpg")
+if img is None:
+print("图片读取失败")
+else:
+# 2. 获取图片尺寸和中心点
+h, w = img.shape[:2]
+center = (w // 2, h // 2)
+# 3. 计算旋转矩阵
+# 角度为负值 = 逆时针（向左）旋转
+M = cv.getRotationMatrix2D(center, -45, 1.0)
+# 4. 执行旋转
+rotated = cv.warpAffine(img, M, (w, h))
+# 5. 显示结果
+plt.imshow(cv.cvtColor(rotated, cv.COLOR_BGR2RGB))
+plt.title("向左旋转 45°")
+plt.show()
